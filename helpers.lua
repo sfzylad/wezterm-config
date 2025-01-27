@@ -3,7 +3,8 @@ local wezterm = require 'wezterm'
 local module = {}
 
 local function setup_font(config)
-    config.font = wezterm.font 'JetBrains Mono'
+    config.font = wezterm.font 'Monaspace Xenon'
+    -- config.font = wezterm.font 'JetBrains Mono'
     config.font_size = 14.0
 end
 
