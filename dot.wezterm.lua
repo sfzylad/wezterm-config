@@ -4,6 +4,7 @@ local os = require 'os'
 local wezterm = require 'wezterm'
 local act = wezterm.action
 
+-- Helper functions
 local write_theme = function (content)
     local h = os.getenv("HOME")
     local theme_dir = h .. "/" .. "tmp"
@@ -29,21 +30,15 @@ wezterm.on('toggle-light-colorscheme', function(window, pane)
   window:set_config_overrides(overrides)
 end)
 
--- local config = {}
+-- Config starts here
 local config = wezterm.config_builder()
--- helpers.apply_to_config(config)
 
 config.font = wezterm.font 'Monaspace Xenon'
 config.font_size = 13.5
-config.color_scheme = 'Rosé Pine (Gogh)'
--- config.color_scheme = 'Mellifluous'
+-- config.color_scheme = 'Rosé Pine (Gogh)'
+config.color_scheme = 'Mellifluous'
 config.harfbuzz_features = { 'calt=0' }
-config.window_padding = {
-    left = 5,
-    right = 6,
-    top = 5,
-    bottom = 5,
-}
+custom_block_glyphs = false
 config.use_dead_keys = false
 config.leader = { key = 'Space', mods = 'ALT|CTRL|SHIFT' }
 config.keys = {
@@ -54,12 +49,55 @@ config.keys = {
     },
 }
 
+-- Cursor
+config.cursor_thickness = 1
+config.cursor_blink_rate = 500
+config.animation_fps = 1
+config.cursor_blink_ease_in = 'Constant'
+config.cursor_blink_ease_out = 'Constant'
+
+-- Visual bell
+config.visual_bell = {
+  fade_in_function = 'EaseIn',
+  fade_in_duration_ms = 50,
+  fade_out_function = 'EaseOut',
+  fade_out_duration_ms = 50,
+}
+
+-- Padding
+local padding = 1
+config.window_padding = {
+    left = padding,
+    right = padding,
+    top = padding,
+    bottom = padding,
+}
+-- config.window_padding = {
+--     left = 5,
+--     right = 6,
+--     top = 5,
+--     bottom = 5,
+-- }
+
+-- UI
+config.hide_tab_bar_if_only_one_tab = true
+config.window_decorations = "RESIZE"
+config.max_fps = 144
+
+-- Disable audible bell
+config.audible_bell = "Disabled"
+
+config.colors = {
+  visual_bell = '#202020',
+}
+
 config.quick_select_patterns = {
   '[k-z]{6,40}', -- JJ ChangeID
 }
 
 config.send_composed_key_when_left_alt_is_pressed = false
 config.send_composed_key_when_right_alt_is_pressed = true
+config.window_background_opacity = 0.95
 
 config.keys = {
     {
