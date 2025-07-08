@@ -1,24 +1,30 @@
--- local helpers = require 'helpers'
+local io = require 'io'
+local os = require 'os'
+
 local wezterm = require 'wezterm'
+local act = wezterm.action
+
+local write_theme = function (content)
+    local h = os.getenv("HOME")
+    local theme_dir = h .. "/" .. "tmp"
+    os.execute("mkdir -p " .. theme_dir)
+    local theme_file = h .. "/" .. "tmp" .. "/" .. ".theme"
+
+    local f = io.open(theme_file, "w+")
+    f:write(content)
+    f:flush()
+    f:close()
+end
 
 wezterm.on('toggle-light-colorscheme', function(window, pane)
+  local name = '/Users/dzyla/tmp/.theme'
   local overrides = window:get_config_overrides() or {}
   if not overrides.color_scheme then
     overrides.color_scheme = 'Github'
-    -- overrides.color_scheme = 'Rosé Pine Dawn (Gogh)'
+    write_theme("--light --syntax-theme=GitHub")
   else
     overrides.color_scheme = nil
-  end
-  window:set_config_overrides(overrides)
-end)
-
-wezterm.on('toggle-dark-colorscheme', function(window, pane)
-  local overrides = window:get_config_overrides() or {}
-  if not overrides.color_scheme then
-    overrides.color_scheme = 'Rosé Pine Dawn (Gogh)'
-    -- overrides.window_background_opacity = 0.5
-  else
-    overrides.color_scheme = nil
+    write_theme("--dark --syntax-theme=ansi")
   end
   window:set_config_overrides(overrides)
 end)
@@ -30,6 +36,7 @@ local config = wezterm.config_builder()
 config.font = wezterm.font 'Monaspace Xenon'
 config.font_size = 13.5
 config.color_scheme = 'Rosé Pine (Gogh)'
+-- config.color_scheme = 'Mellifluous'
 config.harfbuzz_features = { 'calt=0' }
 config.window_padding = {
     left = 5,
@@ -61,4 +68,5 @@ config.keys = {
         action = wezterm.action.EmitEvent 'toggle-light-colorscheme',
     },
 }
+
 return config
