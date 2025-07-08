@@ -38,7 +38,7 @@ config.font_size = 13.5
 -- config.color_scheme = 'Rosé Pine (Gogh)'
 config.color_scheme = 'Mellifluous'
 config.harfbuzz_features = { 'calt=0' }
-custom_block_glyphs = false
+config.custom_block_glyphs = false
 config.use_dead_keys = false
 config.leader = { key = 'Space', mods = 'ALT|CTRL|SHIFT' }
 config.keys = {
