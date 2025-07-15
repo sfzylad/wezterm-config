@@ -17,6 +17,27 @@ local write_theme = function (content)
     f:close()
 end
 
+local format_time = function()
+  local date = os.date("%I:%M %p")
+  return date
+end
+
+local function update_status(window, pane)
+  window:set_right_status(format_time())
+end
+
+wezterm.on("active-pane-changed", function(window, pane)
+  update_status(window, pane)
+end)
+
+wezterm.on("update-right-status", function(window, pane)
+  update_status(window, pane)
+end)
+
+wezterm.on("gui-startup", function(window, pane)
+  update_status(window, pane)
+end)
+
 wezterm.on('toggle-light-colorscheme', function(window, pane)
   local name = '/Users/dzyla/tmp/.theme'
   local overrides = window:get_config_overrides() or {}
