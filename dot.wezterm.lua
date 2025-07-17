@@ -5,7 +5,7 @@ local wezterm = require 'wezterm'
 local act = wezterm.action
 
 -- Helper functions
-local write_theme = function (content)
+local write_theme = function(content)
     local h = os.getenv("HOME")
     local theme_dir = h .. "/" .. "tmp"
     os.execute("mkdir -p " .. theme_dir)
@@ -18,37 +18,37 @@ local write_theme = function (content)
 end
 
 local format_time = function()
-  local date = os.date("%I:%M %p")
-  return date
+    local date = os.date("%I:%M %p")
+    return date
 end
 
 local function update_status(window, pane)
-  window:set_right_status(format_time())
+    window:set_right_status(format_time())
 end
 
 wezterm.on("active-pane-changed", function(window, pane)
-  update_status(window, pane)
+    update_status(window, pane)
 end)
 
 wezterm.on("update-right-status", function(window, pane)
-  update_status(window, pane)
+    update_status(window, pane)
 end)
 
 wezterm.on("gui-startup", function(window, pane)
-  update_status(window, pane)
+    update_status(window, pane)
 end)
 
 wezterm.on('toggle-light-colorscheme', function(window, pane)
-  local name = '/Users/dzyla/tmp/.theme'
-  local overrides = window:get_config_overrides() or {}
-  if not overrides.color_scheme then
-    overrides.color_scheme = 'Github'
-    write_theme("--light --syntax-theme=GitHub")
-  else
-    overrides.color_scheme = nil
-    write_theme("--dark --syntax-theme=ansi")
-  end
-  window:set_config_overrides(overrides)
+    local name = '/Users/dzyla/tmp/.theme'
+    local overrides = window:get_config_overrides() or {}
+    if not overrides.color_scheme then
+        overrides.color_scheme = 'Github'
+        write_theme("--light --syntax-theme=GitHub")
+    else
+        overrides.color_scheme = nil
+        write_theme("--dark --syntax-theme=ansi")
+    end
+    window:set_config_overrides(overrides)
 end)
 
 -- Config starts here
@@ -79,10 +79,10 @@ config.cursor_blink_ease_out = 'Constant'
 
 -- Visual bell
 config.visual_bell = {
-  fade_in_function = 'EaseIn',
-  fade_in_duration_ms = 50,
-  fade_out_function = 'EaseOut',
-  fade_out_duration_ms = 50,
+    fade_in_function = 'EaseIn',
+    fade_in_duration_ms = 50,
+    fade_out_function = 'EaseOut',
+    fade_out_duration_ms = 50,
 }
 
 -- Padding
@@ -109,11 +109,11 @@ config.max_fps = 144
 config.audible_bell = "Disabled"
 
 config.colors = {
-  visual_bell = '#202020',
+    visual_bell = '#202020',
 }
 
 config.quick_select_patterns = {
-  '[k-z]{6,40}', -- JJ ChangeID
+    '[k-z]{6,40}', -- JJ ChangeID
 }
 
 config.send_composed_key_when_left_alt_is_pressed = false
@@ -127,5 +127,63 @@ config.keys = {
         action = wezterm.action.EmitEvent 'toggle-light-colorscheme',
     },
 }
+
+-- The filled in variant of the < symbol
+local SOLID_LEFT_ARROW = wezterm.nerdfonts.pl_right_hard_divider
+
+-- The filled in variant of the > symbol
+local SOLID_RIGHT_ARROW = wezterm.nerdfonts.pl_left_hard_divider
+
+-- This function returns the suggested title for a tab.
+-- It prefers the title that was set via `tab:set_title()`
+-- or `wezterm cli set-tab-title`, but falls back to the
+-- title of the active pane in that tab.
+function tab_title(tab_info)
+    local title = tab_info.tab_title
+    -- if the tab title is explicitly set, take that
+    if title and #title > 0 then
+        return title
+    end
+    -- Otherwise, use the title from the active pane
+    -- in that tab
+    return tab_info.active_pane.title
+end
+
+wezterm.on(
+    'format-tab-title',
+    function(tab, tabs, panes, cfg, hover, max_width)
+        local edge_background = '#0b0022'
+        local background = '#1b1032'
+        local foreground = '#808080'
+
+        if tab.is_active then
+            background = '#2b2042'
+            foreground = '#c0c0c0'
+        elseif hover then
+            background = '#3b3052'
+            foreground = '#909090'
+        end
+
+        local edge_foreground = background
+
+        local title = tab_title(tab)
+
+        -- ensure that the titles fit in the available space,
+        -- and that we have room for the edges.
+        title = wezterm.truncate_right(title, max_width - 2)
+
+        return {
+            { Background = { Color = edge_background } },
+            { Foreground = { Color = edge_foreground } },
+            { Text = SOLID_LEFT_ARROW },
+            { Background = { Color = background } },
+            { Foreground = { Color = foreground } },
+            { Text = title },
+            { Background = { Color = edge_background } },
+            { Foreground = { Color = edge_foreground } },
+            { Text = SOLID_RIGHT_ARROW },
+        }
+    end
+)
 
 return config
