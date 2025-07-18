@@ -26,30 +26,24 @@ local function update_status(window, pane)
     window:set_right_status(format_time())
 end
 
-wezterm.on("active-pane-changed", function(window, pane)
-    update_status(window, pane)
-end)
 
-wezterm.on("update-right-status", function(window, pane)
-    update_status(window, pane)
-end)
-
-wezterm.on("gui-startup", function(window, pane)
-    update_status(window, pane)
-end)
-
-wezterm.on('toggle-light-colorscheme', function(window, pane)
-    local name = '/Users/dzyla/tmp/.theme'
-    local overrides = window:get_config_overrides() or {}
-    if not overrides.color_scheme then
-        overrides.color_scheme = 'Github'
-        write_theme("--light --syntax-theme=GitHub")
+-- Function to get the current process name
+local function get_current_process_name(tab)
+    local process_name = tab.active_pane.foreground_process_name
+    if process_name == "" then
+        process_name = "wezterm"
     else
-        overrides.color_scheme = nil
-        write_theme("--dark --syntax-theme=ansi")
+        -- Extract the last part of the process name (e.g., "bash" from "/usr/bin/bash")
+        process_name = string.match(process_name, "([^/]+)$")
     end
-    window:set_config_overrides(overrides)
+    return process_name
+end
+
+-- Function to periodically update the tab titles
+wezterm.on('update-right-status', function(window, pane)
+    window:set_right_status(" ")
 end)
+
 
 -- Config starts here
 local config = wezterm.config_builder()
@@ -152,6 +146,7 @@ end
 wezterm.on(
     'format-tab-title',
     function(tab, tabs, panes, cfg, hover, max_width)
+        local process_name = get_current_process_name(tab)
         local edge_background = '#0b0022'
         local background = '#1b1032'
         local foreground = '#808080'
@@ -178,12 +173,37 @@ wezterm.on(
             { Text = SOLID_LEFT_ARROW },
             { Background = { Color = background } },
             { Foreground = { Color = foreground } },
-            { Text = title },
+            { Text = process_name },
             { Background = { Color = edge_background } },
             { Foreground = { Color = edge_foreground } },
             { Text = SOLID_RIGHT_ARROW },
         }
     end
 )
+
+wezterm.on("active-pane-changed", function(window, pane)
+    update_status(window, pane)
+end)
+
+wezterm.on("update-right-status", function(window, pane)
+    update_status(window, pane)
+end)
+
+wezterm.on("gui-startup", function(window, pane)
+    update_status(window, pane)
+end)
+
+wezterm.on('toggle-light-colorscheme', function(window, pane)
+    local name = '/Users/dzyla/tmp/.theme'
+    local overrides = window:get_config_overrides() or {}
+    if not overrides.color_scheme then
+        overrides.color_scheme = 'Github'
+        write_theme("--light --syntax-theme=GitHub")
+    else
+        overrides.color_scheme = nil
+        write_theme("--dark --syntax-theme=ansi")
+    end
+    window:set_config_overrides(overrides)
+end)
 
 return config
