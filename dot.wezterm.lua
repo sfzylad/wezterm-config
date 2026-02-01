@@ -2,7 +2,6 @@ local io = require 'io'
 local os = require 'os'
 
 local wezterm = require 'wezterm'
-local act = wezterm.action
 
 -- Helper functions
 local write_theme = function(content)
@@ -22,7 +21,7 @@ local format_time = function()
     return date
 end
 
-local function update_status(window, pane)
+local function update_status(window, _)
     window:set_right_status(format_time())
 end
 
@@ -40,7 +39,7 @@ local function get_current_process_name(tab)
 end
 
 -- Function to periodically update the tab titles
-wezterm.on('update-right-status', function(window, pane)
+wezterm.on('update-right-status', function(window, _)
     window:set_right_status(" ")
 end)
 
@@ -48,10 +47,21 @@ end)
 -- Config starts here
 local config = wezterm.config_builder()
 
-config.font = wezterm.font 'Monaspace Xenon'
+-- config.font = wezterm.font 'Monaspace Xenon'
+config.font = wezterm.font {
+    family = 'Fira Code',
+    -- https://github.com/tonsky/FiraCode/wiki/How-to-enable-stylistic-sets
+    harfbuzz_features = {
+        'calt=0', -- disable all ligatures and then enable just selected few
+        'cv05',   -- nicer 'i'
+        'cv09',   -- nicer 'l'
+        'cv31',   -- nicer brackets
+        'ss03',   -- nicer &
+        'ss05',   -- nicer @
+    },
+}
 config.font_size = 13.5
--- config.color_scheme = 'Rosé Pine (Gogh)'
-config.color_scheme = 'Mellifluous'
+
 config.harfbuzz_features = { 'calt=0' }
 config.custom_block_glyphs = false
 config.use_dead_keys = false
@@ -132,7 +142,7 @@ local SOLID_RIGHT_ARROW = wezterm.nerdfonts.pl_left_hard_divider
 -- It prefers the title that was set via `tab:set_title()`
 -- or `wezterm cli set-tab-title`, but falls back to the
 -- title of the active pane in that tab.
-function tab_title(tab_info)
+local function tab_title(tab_info)
     local title = tab_info.tab_title
     -- if the tab title is explicitly set, take that
     if title and #title > 0 then
@@ -145,7 +155,7 @@ end
 
 wezterm.on(
     'format-tab-title',
-    function(tab, tabs, panes, cfg, hover, max_width)
+    function(tab, _, _, _, hover, max_width)
         local process_name = get_current_process_name(tab)
         local edge_background = '#0b0022'
         local background = '#1b1032'
@@ -193,8 +203,7 @@ wezterm.on("gui-startup", function(window, pane)
     update_status(window, pane)
 end)
 
-wezterm.on('toggle-light-colorscheme', function(window, pane)
-    local name = '/Users/dzyla/tmp/.theme'
+wezterm.on('toggle-light-colorscheme', function(window, _)
     local overrides = window:get_config_overrides() or {}
     if not overrides.color_scheme then
         overrides.color_scheme = 'Github'
